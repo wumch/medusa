@@ -1,0 +1,19 @@
+{
+  "name": "medusa",
+  "version": "0.0.1",
+  "description": "淘宝账号注册",
+  "main": "src/main.js",
+  "dependencies": {
+    "electron": "^2.0.2"
+  },
+  "devDependencies": {
+    "robotjs": "^0.5.1"
+  },
+  "scripts": {
+    "start": "./node_modules/electron/dist/electron .",
+    "test": "echo \"Not yet implemented\" && exit 1",
+    "rebuild": "npm rebuild --runtime=electron --target=2.0.2 --disturl=https://atom.io/download/atom-shell --abi=64"
+  },
+  "author": "wumch",
+  "license": "Apache-2.0"
+}
