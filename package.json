@@ -15,5 +15,16 @@
     "rebuild": "npm rebuild --runtime=electron --target=2.0.2 --disturl=https://atom.io/download/atom-shell --abi=64"
   },
   "author": "wumch",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "directories": {
+    "doc": "doc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wumch/medusa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wumch/medusa/issues"
+  },
+  "homepage": "https://github.com/wumch/medusa#readme"
 }
