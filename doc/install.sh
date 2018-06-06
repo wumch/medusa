@@ -6,6 +6,6 @@ mkdir /data/code/pandora/medusa
 cd /data/code/pandora/medusa
 npm config set registry https://registry.npm.taobao.org
 npm init
-ELECTRON_MIRROR="https://npm.taobao.org/mirrors/electron/" npm install electron --save-dev
+ELECTRON_MIRROR="https://npm.taobao.org/mirrors/electron/" npm install electron
+npm install robotjs
 npm rebuild --runtime=electron --target=2.0.2 --disturl=https://atom.io/download/atom-shell --abi=57
-npm install robotjs --save-dev

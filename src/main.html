@@ -5,7 +5,7 @@
     <title>register</title>
 </head>
 <body style="width:100%;height:100%;overflow:hidden">
-<webview id="register" src="about:blank" style="position:absolute;left:0;top:0;width:100%;height:100%;"
+<webview id="register" src="https://reg.taobao.com/member/reg/fill_mobile.htm" style="position:absolute;left:0;top:0;width:100%;height:100%;min-width:1280px;min-height:1024px;"
 src="https://reg.taobao.com/member/reg/fill_mobile.htm"
 useragent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"
 partition="persist: register" preload="./preload" disablewebsecurity
@@ -13,15 +13,37 @@ partition="persist: register" preload="./preload" disablewebsecurity
 <script>
     onload = () => {
         const {remote} = require('electron');
+        const robot = require('robotjs');
         const config = remote.getGlobal('config');
         const webview = document.querySelector('webview');
         let started = false;
+
+        const blockCaptchaHandler = function() {
+            robot.setMouseDelay(100);
+            robot.moveMouse(567, 384);
+            robot.mouseToggle('down');
+            robot.dragMouse(857, 387);
+            robot.mouseToggle('up');
+        };
+
         webview.addEventListener('dom-ready', () => {
-            if (started) return;
-            started = true;
-            webview.openDevTools({mode: 'right'});
-            webview.loadURL('https://reg.taobao.com/member/reg/fill_mobile.htm');
+            webview.openDevTools();
+            // alert('aaaa');
+            // if (started) return;
+            // started = true;
+            // webview.loadURL('https://reg.taobao.com/member/reg/fill_mobile.htm');
+            // robot.moveMouse(651, 692);
+            // robot.mouseClick('left');
+            // alert('bbbb');
+            // setTimeout(blockCaptchaHandler, 2000);
         });
+
+        webview.addEventListener('click', function() {
+            alert('ccc');
+            blockCaptchaHandler();
+        });
+
+
     }
 </script>
 </body>
