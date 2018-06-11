@@ -3,7 +3,8 @@
 
 (function() {
 
-    const {ipcRenderer} = require("electron");
+    const {remote, ipcRenderer} = require("electron");
+    const context = remote.getGlobal('context');
 
     const route = function() {
         const handlerMap = {
