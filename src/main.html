@@ -12,38 +12,13 @@
     partition="persist: register" preload="./preload" disablewebsecurity>
 </webview>
 <script>
-    onload = () => {
-        const {remote} = require('electron');
-        const robot = require('robotjs');
-        const config = remote.getGlobal('config');
-        const webview = document.querySelector('webview');
-        let started = false;
-
-        const blockCaptchaHandler = function() {
-            robot.setMouseDelay(100);
-            robot.moveMouse(567, 384);
-            robot.mouseToggle('down');
-            robot.dragMouse(857, 387);
-            robot.mouseToggle('up');
-        };
-
+    window.addEventListener('load', () => {
+        const webview = document.getElementById('register');
         webview.addEventListener('dom-ready', () => {
             webview.openDevTools();
-            // alert('aaaa');
-            // if (started) return;
-            // started = true;
-            // webview.loadURL('https://reg.taobao.com/member/reg/fill_mobile.htm');
-            // robot.moveMouse(651, 692);
-            // robot.mouseClick('left');
-            // alert('bbbb');
-            // setTimeout(blockCaptchaHandler, 2000);
+            require('./worker').start(webview);
         });
-
-        webview.addEventListener('click', function() {
-            alert('ccc');
-            blockCaptchaHandler();
-        });
-    }
+    });
 </script>
 </body>
 </html>

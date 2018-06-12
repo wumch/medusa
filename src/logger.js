@@ -4,40 +4,41 @@ const log4js = require('log4js');
 const configuredLoggers = {};
 
 const getLogger = function(kind) {
-    if (!configuredLoggers[kind]) {
-        const appenders = [];
-        if (config.debug && Object.keys(configuredLoggers).length === 0) {
-            appenders.push({type: 'console'});
-        }
-        appenders.push({category: kind, type: 'file', filename: config.logFile});
-        log4js.configure({
-            replaceConsole: true,
-            appenders: {
-                stdout: {  // 控制台输出
-                    type: 'stdout',
-                },
-                main: {  // 主线程
-                    type: 'dateFile',
-                    filename: 'logs/',
-                    pattern: 'main-yyyy-MM-dd.log',
-                    alwaysIncludePattern: true,
-                },
-                renderer: {  // 渲染线程
-                    type: 'dateFile',
-                    filename: 'logs/',
-                    pattern: 'renderer-yyyy-MM-dd.log',
-                    alwaysIncludePattern: true,
-                }
-            },
-            categories: {
-                main: { appenders: ['stdout', 'main'], level: 'debug' },
-                renderer: { appenders: ['stdout', 'renderer'], level: 'debug' },
-                default: { appenders: ['stdout'], level: 'debug' },
-            }
-        });
-        configuredLoggers[kind] = log4js.getLogger(kind);
+    const logger = configuredLoggers[kind];
+    if (logger) {
+        return logger;
     }
-    return configuredLoggers[kind];
+    const appenders = [];
+    if (config.debug && Object.keys(configuredLoggers).length === 0) {
+        appenders.push({type: 'console'});
+    }
+    appenders.push({category: kind, type: 'file', filename: config.logFile});
+    log4js.configure({
+        replaceConsole: true,
+        appenders: {
+            stdout: {  // 控制台输出
+                type: 'stdout',
+            },
+            master: {  // 主线程(browser)
+                type: 'dateFile',
+                filename: 'logs/',
+                pattern: 'master-yyyy-MM-dd.log',
+                alwaysIncludePattern: true,
+            },
+            worker: {  // 渲染线程(renderer)
+                type: 'dateFile',
+                filename: 'logs/',
+                pattern: 'worker-yyyy-MM-dd.log',
+                alwaysIncludePattern: true,
+            }
+        },
+        categories: {
+            master: { appenders: ['stdout', 'master'], level: 'debug' },
+            worker: { appenders: ['stdout', 'worker'], level: 'debug' },
+            default: { appenders: ['stdout'], level: 'debug' },
+        }
+    });
+    return configuredLoggers[kind] = log4js.getLogger(kind);
 };
 
 exports.getLogger = getLogger;
