@@ -1,10 +1,11 @@
 
 const {remote} = require('electron');
 const robot = require('robotjs');
-const config = remote.getGlobal('config');
-const logger = require('./logger').getLogger('worker');
-const {clickPos, clickElement} = require('./handler/operate');
+const config = remote.getGlobal('./config');
+const logger = require('./logger').getLogger('./worker');
+const {clickInRect, mouseDrag, genCodeCall, getRect, waitFor} = require('./operate');
 let webview = null;
+let wc = null;
 
 // todo: one day, FSM...
 const steps = [
@@ -15,8 +16,22 @@ const steps = [
     'forward',  // 点击下一步
 ];
 
+// 检查元素是否出现
+const elementAppears = (selector, func) => {
+    wc.executeJavaScript(genCodeCall((s) => {
+        return !!document.querySelector(s);
+    }, selector), true, func);
+};
+
+// 等待点击 同意协议
 const agreeTerm = () => {
-    clickElement();
+    let agreeBtnAppears = false;
+    waitFor({
+        testFunc: () => {
+            elementAppears('#J_AgreementBtn', (res) => {agreeBtnAppears = res;});
+            return agreeBtnAppears;
+        },
+    });
 };
 
 const setProxy = proxy => {
@@ -25,8 +40,17 @@ const setProxy = proxy => {
     });
 };
 
-exports.start = function(_webview) {
+// 点击<webview>内部元素
+const clickElement = (selector) => {
+    wc.executeJavaScript(getRect(selector), true, clickInRect);
+};
+
+const bootstrap = () => {
+    clickElement('#J_AgreementBtn');
+};
+
+exports.start = _webview => {
     webview = _webview;
-    logger.info(webview.getWebContents().getURL());
-    setTimeout(moveCaptcha, 10000);
+    wc = webview.getWebContents();
+    bootstrap();
 };

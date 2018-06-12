@@ -4,6 +4,9 @@ const config = global.config || require('electron').remote.getGlobal('config');
 const configuredLoggers = {};
 
 const getLogger = function(kind) {
+    if (arguments.length === 0) {
+        kind = require('process').type === 'browser' ? 'master' : 'worker';
+    }
     const logger = configuredLoggers[kind];
     if (logger) {
         return logger;
