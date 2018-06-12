@@ -64,21 +64,21 @@ const genCodeCall = (func, args) => {
     return code;
 };
 
-// 等待执行
+// 等待执行 {test, ready, }
 const waitFor = function(options) {
     const maxtimeOutMillis = options.timeoutMillis || 3000,
         end = new Date().getTime() + maxtimeOutMillis;
     const work = function() {
-        if (options.testFunc()) {
+        if (options.test()) {
             if (options.delayMillis) {
-                setTimeout(options.onReady, options.delayMillis);
+                setTimeout(options.ready, options.delayMillis);
             } else {
-                options.onReady();
+                options.ready();
             }
         } else if (new Date().getTime() < end) {
             setTimeout(work, 200);
         } else {
-            options.onTimeout();
+            options.timeout();
         }
     };
     work();

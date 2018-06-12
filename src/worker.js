@@ -23,14 +23,22 @@ const elementAppears = (selector, func) => {
     }, selector), true, func);
 };
 
-// 等待点击 同意协议
+// 等待点击【同意协议】
 const agreeTerm = () => {
+    const btnSelector = '#J_AgreementBtn';
     let agreeBtnAppears = false;
     waitFor({
         testFunc: () => {
-            elementAppears('#J_AgreementBtn', (res) => {agreeBtnAppears = res;});
+            elementAppears(btnSelector, (res) => {agreeBtnAppears = res;});
             return agreeBtnAppears;
         },
+        ready: () => {
+            clickElement(btnSelector);
+        },
+        timeout: () => {
+            logger.warn('agree term timeout');
+        },
+
     });
 };
 
@@ -46,7 +54,7 @@ const clickElement = (selector) => {
 };
 
 const bootstrap = () => {
-    clickElement('#J_AgreementBtn');
+    agreeTerm();
 };
 
 exports.start = _webview => {
