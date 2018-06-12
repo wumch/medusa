@@ -4,10 +4,7 @@
 exports.config = {
     debug: false,
     show: true,
-    autoLogin: true,
-    fastLogin: true,
     logDir: "logs",
-    logFile: "register.log",
     logLevel: "DEBUG",
     restart_deadline: 150000,
 
