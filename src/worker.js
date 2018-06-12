@@ -3,10 +3,8 @@ const {remote} = require('electron');
 const robot = require('robotjs');
 const config = remote.getGlobal('config');
 const logger = require('./logger').getLogger('worker');
-
+const {clickPos, clickElement} = require('./handler/operate');
 let webview = null;
-
-setTimeout(() => {logger.info(config.winPos)}, 10000);
 
 // todo: one day, FSM...
 const steps = [
@@ -17,12 +15,8 @@ const steps = [
     'forward',  // 点击下一步
 ];
 
-const blockCaptchaHandler = () => {
-    robot.setMouseDelay(100);
-    robot.moveMouse(567, 384);
-    robot.mouseToggle('down');
-    robot.dragMouse(857, 387);
-    robot.mouseToggle('up');
+const agreeTerm = () => {
+    clickElement();
 };
 
 const setProxy = proxy => {
@@ -33,11 +27,6 @@ const setProxy = proxy => {
 
 exports.start = function(_webview) {
     webview = _webview;
-
-    alert('bbb');
-
-    webview.addEventListener('click', event => {
-        alert('aaaa');
-        blockCaptchaHandler();
-    });
+    logger.info(webview.getWebContents().getURL());
+    setTimeout(moveCaptcha, 10000);
 };

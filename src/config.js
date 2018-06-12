@@ -1,11 +1,13 @@
 
-"use strict";
+'use strict';
 
 exports.config = {
-    debug: false,
+    debug: true,
     show: true,
-    logDir: "logs",
-    logLevel: "DEBUG",
+    log: {
+        dir: 'logs',
+        level: 'debug',
+    },
     restart_deadline: 150000,
 
     winPos: {x: 0, y: 0},

@@ -20,6 +20,7 @@ const startup = function() {
     win.addListener('move', function () {
         config.winPos = win.getPosition();
     });
+    win.webContents.openDevTools();
 
     win.loadURL('file://' + __dirname + '/main.html');
 };
