@@ -4,6 +4,15 @@ const robot = require('robotjs');
 const config = remote.getGlobal('config');
 const {getLogger} = require('./logger');
 
+/**
+ * @type WebContents
+ */
+let wc;
+
+const initialize = _wc => {
+    wc = _wc;
+};
+
 // 点击全局坐标
 const clickPos = pos => {
     robot.moveMouse(pos.x, pos.y);
@@ -43,6 +52,14 @@ const mouseDrag = (from, to) => {
     robot.mouseToggle('up');
 };
 
+// 生成js代码：向<selector>输入文本
+const genCodeTypeText = (selector, text) => {
+    const f = (s, t) => {
+        document.querySelector(s).value = t;
+    };
+    return genCodeCall(f, [selector, text]);
+};
+
 // 生成js代码：取<webview>内部元素的位置
 const genCodeGetRect = (selector) => {
     const f = s => {
@@ -69,6 +86,13 @@ const genCodeCall = (func, args) => {
     return code;
 };
 
+// Promise: 穿梭执行(在<webview>内执行{jsCode})
+const shuttle = (jsCode, userGesture=true) => {
+    return new Promise((resolve, reject) => {
+        wc.executeJavaScript(jsCode, userGesture, resolve);
+    });
+};
+
 // 延迟执行
 const defer = (delay, randomFactor=0) => {
     return new Promise((resolve, reject) => {
@@ -80,16 +104,12 @@ const defer = (delay, randomFactor=0) => {
 };
 
 // 条件等待
-const untill = (inspect, delay, timeout) => {
+const untill = (inspect, timeout) => {
     return new Promise((resolve, reject) => {
         const end = new Date().getTime() + (timeout || 3000);
         const work = () => {
             if (inspect()) {
-                if (delay) {
-                    defer(delay).then(resolve);
-                } else {
-                    resolve();
-                }
+                resolve();
             } else if (new Date().getTime() < end) {
                 defer(200).then(work);
             } else {
@@ -100,12 +120,42 @@ const untill = (inspect, delay, timeout) => {
     });
 };
 
+// 等待<selector>出现
+const waitElement = (selector, timeout) => {
+    const f = s => {
+        return !!document.querySelector(s);
+    };
+    const code = genCodeCall(f, [selector]);
+    const end = new Date().getTime() + (timeout || 3000);
+    let resolve, reject;
+    const exam = exists => {
+        if (exists) {
+            resolve();
+        } else if (new Date().getTime() > end) {
+            getLogger().warn('wait for element [' + selector + '] timeout after ' + (timeout || 3000));
+            reject();
+        } else {
+            return defer(200).then(() => {
+                return shuttle(code).then(exam);
+            });
+        }
+    };
+    return new Promise((_resolve, _reject) => {
+        resolve = _resolve;
+        reject = _reject;
+        exam(false);
+    });
+};
+
 exports.clickPos = clickPos;
 exports.clickInRect = clickInRect;
+exports.genCodeTypeText = genCodeTypeText;
 exports.mouseDrag = mouseDrag;
+exports.shuttle = shuttle;
 exports.genCodeCall = genCodeCall;
 exports.genCodeGetRect = genCodeGetRect;
 exports.untill = untill;
 exports.defer = defer;
+exports.waitElement = waitElement;
 exports.posInRect = posInRect;
 exports.globalPos = globalPos;
