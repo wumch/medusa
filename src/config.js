@@ -10,8 +10,6 @@ exports.config = {
         dir: 'logs',
         level: 'debug',
     },
-    restartDeadline: 150000,
-
     winPos: {x: 0, y: 0},
     winSize: {width: 1280, height: 1024},
     winFrame: {width: 0, height: 0},
