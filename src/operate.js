@@ -52,7 +52,7 @@ const getRect = (selector) => {
 // 生成js代码
 const genCodeCall = (func, args) => {
     const funcBody = '(' + func.toString() + ')';
-    if (!args) {
+    if (!args || args.length === 0) {
         return funcBody + '()';
     }
     const argsSegs = [];
