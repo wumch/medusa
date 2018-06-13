@@ -15,7 +15,6 @@
     window.addEventListener('load', () => {
         const webview = document.getElementById('register');
         webview.addEventListener('dom-ready', () => {
-            webview.openDevTools();
             require('./worker').start(webview);
         });
     });

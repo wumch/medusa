@@ -1,9 +1,9 @@
 
 const {remote} = require('electron');
 const robot = require('robotjs');
-const config = remote.getGlobal('./config');
-const logger = require('./logger').getLogger('./worker');
-const {clickInRect, mouseDrag, genCodeCall, getRect, waitFor} = require('./operate');
+const config = remote.getGlobal('config');
+const logger = require('./logger').getLogger('worker');
+const {clickInRect, mouseDrag, genCodeCall, genCodeGetRect, untill, defer, posInRect, globalPos} = require('./operate');
 let webview = null;
 let wc = null;
 
@@ -16,29 +16,46 @@ const steps = [
     'forward',  // 点击下一步
 ];
 
+// Promise: 穿梭执行(在<webview>内执行{jsCode})
+const shuttle = (jsCode, userGesture=true) => {
+    return new Promise((resolve, reject) => {
+        wc.executeJavaScript(jsCode, userGesture, resolve);
+    });
+};
+
 // 检查元素是否出现
-const elementAppears = (selector, func) => {
-    wc.executeJavaScript(genCodeCall((s) => {
+const elementExists = (selector, func) => {
+    wc.executeJavaScript(genCodeCall(s => {
         return !!document.querySelector(s);
-    }, selector), true, func);
+    }, [selector]), true, func);
 };
 
 // 等待点击【同意协议】
 const agreeTerm = () => {
     const btnSelector = '#J_AgreementBtn';
+    let blockRect = null;
     let agreeBtnAppears = false;
-    waitFor({
-        testFunc: () => {
-            elementAppears(btnSelector, (res) => {agreeBtnAppears = res;});
-            return agreeBtnAppears;
-        },
-        ready: () => {
-            clickElement(btnSelector);
-        },
-        timeout: () => {
-            logger.warn('agree term timeout');
-        },
-
+    untill(() => {  // 等待弹出【同意协议】
+        elementExists(btnSelector, res => {agreeBtnAppears = res;});
+        return agreeBtnAppears;
+    }, 1500, 3000).then(() => {  // 点击【同意协议】，并延迟几秒
+        clickElement(btnSelector);
+        return defer(2000, 5000);
+    }).then(() => {  // 取滑块位置
+        return shuttle(genCodeGetRect('#nc_1_n1z'));
+    }).then((_blockRect) => {  // 取滑槽位置
+        blockRect = _blockRect;
+        return shuttle(genCodeGetRect('#nc_1__scale_text'));
+    }).then((slotRect) => {  // 拖动滑块
+        const fromPos = globalPos(posInRect(blockRect));
+        const rightRect = {
+            x: slotRect.x + slotRect.width - blockRect.width,
+            y: slotRect.y,
+            width: blockRect.width,
+            height: blockRect.height,
+        };
+        const toPos = globalPos(posInRect(rightRect));
+        mouseDrag(fromPos, toPos);
     });
 };
 
@@ -50,7 +67,7 @@ const setProxy = proxy => {
 
 // 点击<webview>内部元素
 const clickElement = (selector) => {
-    wc.executeJavaScript(getRect(selector), true, clickInRect);
+    wc.executeJavaScript(genCodeGetRect(selector), true, clickInRect);
 };
 
 const bootstrap = () => {
@@ -60,5 +77,8 @@ const bootstrap = () => {
 exports.start = _webview => {
     webview = _webview;
     wc = webview.getWebContents();
+    if (config.workerDevTools) {
+        webview.openDevTools();
+    }
     bootstrap();
 };

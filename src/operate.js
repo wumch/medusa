@@ -1,31 +1,37 @@
 
+const {remote} = require('electron');
 const robot = require('robotjs');
+const config = remote.getGlobal('config');
 const {getLogger} = require('./logger');
 
-// 点击坐标
+// 点击全局坐标
 const clickPos = pos => {
     robot.moveMouse(pos.x, pos.y);
+    getLogger().debug('click at', [pos.x + config.winPos.x + config.winFrame.width, pos.y + config.winPos.y + config.winFrame.height]);
     robot.mouseClick();
 };
 
 // 点击DOM元素
 const clickInRect = (rect) => {
-    const pos = {
-        x: rect.x + (Math.random() + 1) * rect.width / 3,  // 中间 1/3  位置
-        y: rect.y + (Math.random() + 1) * rect.height / 3,
-    };
-    getLogger().info('click at', pos);
+    const pos = globalPos(posInRect(rect));
+    getLogger().debug('click in rect', pos);
     clickPos(pos);
 };
 
-// 点击DOM元素
-const clickElement = element => {
-    const box = element.getBoundingClientRect();
-    const pos = {
-        x: box.x + (Math.random() + 1) * box.width / 3,  // 中间 1/3  位置
-        y: box.y + (Math.random() + 1) * box.height / 3,
+// 转换为全局坐标
+const globalPos = (pos) => {
+    return {
+        x: pos.x + config.winPos.x + config.winFrame.width,
+        y: pos.y + config.winPos.y + config.winFrame.height,
     };
-    clickPos(pos);
+};
+
+// 区域随机取点
+const posInRect = (rect) => {
+    return {
+        x: rect.x + (Math.random() + 1) * rect.width / 3,  // 中间 1/3  位置
+        y: rect.y + (Math.random() + 1) * rect.height / 3,
+    };
 };
 
 // 拖动滑块验证码
@@ -38,10 +44,9 @@ const mouseDrag = (from, to) => {
 };
 
 // 生成js代码：取<webview>内部元素的位置
-const getRect = (selector) => {
-    const f = (s) => {
+const genCodeGetRect = (selector) => {
+    const f = s => {
         const e = document.querySelector(s);
-        alert(s);
         if (!e) return null;
         const r = e.getBoundingClientRect();
         return {x: r.x, y: r.y, width: r.width, height: r.height};
@@ -60,34 +65,47 @@ const genCodeCall = (func, args) => {
         argsSegs.push(JSON.stringify(a));
     }
     const code = funcBody + '(' + argsSegs.join(',') + ')';
-    getLogger().debug('generate code: [' + code + ']');
+    getLogger().debug('generate code:', code);
     return code;
 };
 
-// 等待执行 {test, ready, }
-const waitFor = function(options) {
-    const maxtimeOutMillis = options.timeoutMillis || 3000,
-        end = new Date().getTime() + maxtimeOutMillis;
-    const work = function() {
-        if (options.test()) {
-            if (options.delayMillis) {
-                setTimeout(options.ready, options.delayMillis);
-            } else {
-                options.ready();
-            }
-        } else if (new Date().getTime() < end) {
-            setTimeout(work, 200);
-        } else {
-            options.timeout();
+// 延迟执行
+const defer = (delay, randomFactor=0) => {
+    return new Promise((resolve, reject) => {
+        if (randomFactor) {
+            delay += randomFactor * Math.random();
         }
-    };
-    work();
+        setTimeout(resolve, delay);
+    });
+};
+
+// 条件等待
+const untill = (inspect, delay, timeout) => {
+    return new Promise((resolve, reject) => {
+        const end = new Date().getTime() + (timeout || 3000);
+        const work = () => {
+            if (inspect()) {
+                if (delay) {
+                    defer(delay).then(resolve);
+                } else {
+                    resolve();
+                }
+            } else if (new Date().getTime() < end) {
+                defer(200).then(work);
+            } else {
+                reject();
+            }
+        };
+        work();
+    });
 };
 
 exports.clickPos = clickPos;
-exports.clickElement = clickElement;
 exports.clickInRect = clickInRect;
 exports.mouseDrag = mouseDrag;
 exports.genCodeCall = genCodeCall;
-exports.getRect = getRect;
-exports.waitFor = waitFor;
+exports.genCodeGetRect = genCodeGetRect;
+exports.untill = untill;
+exports.defer = defer;
+exports.posInRect = posInRect;
+exports.globalPos = globalPos;

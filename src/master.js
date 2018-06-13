@@ -16,13 +16,15 @@ const startup = function() {
             webSecurity: false,
         }
     });
-
     win.addListener('move', function () {
-        config.winPos = win.getPosition();
+        [config.winPos.x, config.winPos.y] = win.getPosition();
     });
-    win.webContents.openDevTools();
-
+    if (config.masterDevTools) {
+        win.webContents.openDevTools();
+    }
     win.loadURL('file://' + __dirname + '/main.html');
+    [config.winPos.x, config.winPos.y] = win.getPosition();
+    logger.debug('main window pos:', config.winPos);
 };
 
 app.on('window-all-closed', function() {
