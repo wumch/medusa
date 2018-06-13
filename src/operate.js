@@ -103,6 +103,13 @@ const defer = (delay, randomFactor=0) => {
     });
 };
 
+// defer包装，用法：<Promise>.then(deferMaker(300))
+const deferMaker = (delay, randomFactor=0) => {
+    return () => {
+        return defer(delay, randomFactor);
+    }
+};
+
 // 条件等待
 const untill = (inspect, timeout) => {
     return new Promise((resolve, reject) => {
@@ -156,6 +163,7 @@ exports.genCodeCall = genCodeCall;
 exports.genCodeGetRect = genCodeGetRect;
 exports.untill = untill;
 exports.defer = defer;
+exports.deferMaker = deferMaker;
 exports.waitElement = waitElement;
 exports.posInRect = posInRect;
 exports.globalPos = globalPos;
