@@ -68,42 +68,51 @@ const verifyMobile = () => {
 const agreeTerm = () => {
     return new Promise((resolve, reject) => {
         let blockRect = null;
-        waitElement('#J_AgreementBtn', 3000).then(() => {  // 点击【同意协议】，并延迟几秒
-            return clickElement('#J_AgreementBtn');
-        }).then(() => {
-            return defer(2000, 5000);
-        }).then(() => {  // 取滑块位置
-            return shuttle(genCodeGetRect('#nc_1_n1z'));
-        }).then(_blockRect => {  // 取滑槽位置
-            blockRect = _blockRect;
-            return shuttle(genCodeGetRect('#nc_1__scale_text'));
-        }).then(slotRect => {  // 拖动滑块
-            const fromPos = globalPos(posInRect(blockRect));
-            const rightRect = {
-                x: slotRect.x + slotRect.width - blockRect.width,
-                y: slotRect.y,
-                width: blockRect.width,
-                height: blockRect.height,
-            };
-            const toPos = globalPos(posInRect(rightRect));
-            mouseDrag(fromPos, toPos);
-        }).then(deferMaker(500))  // 拖完等一会
-        .then(() => {  // 检查是否验证通过
-            const captchaPast = () => {
-                return !/\bbtn-disabled\b/.test(document.querySelector('#J_BtnMobileForm').className);
-            };
-            return shuttle(genCodeCall(captchaPast));
-        }).then(past => {
-            past ? resolve() : reject();
-        });
+        waitElement('#J_AgreementBtn', 3000)
+            .then(() => {  // 点击【同意协议】，并延迟几秒
+                return clickElement('#J_AgreementBtn');
+            }).then(deferMaker(2000, 5000))
+            .then(() => {  // 取滑块位置
+                return shuttle(genCodeGetRect('#nc_1_n1z'));
+            }).then(_blockRect => {  // 取滑槽位置
+                blockRect = _blockRect;
+                return shuttle(genCodeGetRect('#nc_1__scale_text'));
+            }).then(slotRect => {  // 拖动滑块
+                const fromPos = globalPos(posInRect(blockRect));
+                const rightRect = {
+                    x: slotRect.x + slotRect.width - blockRect.width,
+                    y: slotRect.y,
+                    width: blockRect.width,
+                    height: blockRect.height,
+                };
+                const toPos = globalPos(posInRect(rightRect));
+                mouseDrag(fromPos, toPos);
+            }).then(deferMaker(500))  // 拖完等一会
+            .then(() => {  // 检查是否验证通过
+                const captchaPast = () => {
+                    return !/\bbtn-disabled\b/.test(document.querySelector('#J_BtnMobileForm').className);
+                };
+                return shuttle(genCodeCall(captchaPast));
+            }).then(past => {
+                past ? resolve() : reject();
+            });
     });
 };
 
+const fetchProxy = () => {
+    return new Promise();
+};
+
 // 为<webview>设置http代理
-const setProxy = proxy => {
-    wc.session.setProxy({proxyRules: proxy}, () => {
-        webview.loadURL('https://www.baidu.com/s?wd=ip&rsv_spt=1&rsv_iqid=0x991d149e00045283&issp=1&f=8&rsv_bp=0&rsv_idx=2&ie=utf-8&tn=baiduhome_pg&rsv_enter=1&rsv_sug3=2&rsv_sug1=2&rsv_sug7=100&rsv_sug2=0&inputT=595&rsv_sug4=595');
-    });
+const attachProxy = proxy => {
+    return new Promise((resolve, reject) => {
+        fetchProxy().then(proxy => {
+            wc.session.setProxy({proxyRules: proxy}, () => {
+                logger.info('using proxy', proxy);
+                webview.loadURL('https://www.baidu.com/s?wd=ip&rsv_spt=1&rsv_iqid=0x991d149e00045283&issp=1&f=8&rsv_bp=0&rsv_idx=2&ie=utf-8&tn=baiduhome_pg&rsv_enter=1&rsv_sug3=2&rsv_sug1=2&rsv_sug7=100&rsv_sug2=0&inputT=595&rsv_sug4=595');
+            });
+        }, reject);
+    })
 };
 
 // 点击<webview>内部元素
@@ -119,7 +128,9 @@ const restart = () => {
 
 // 启动
 const bootstrap = () => {
-    agreeTerm()  // 同意协议
+    attachProxy()  // 设置http代理
+        .then(deferMaker(100))
+        .then(agreeTerm, restart)  // 同意协议
         .then(deferMaker(1000, 3000))
         .then(verifyMobile, restart)  // 手机号验证
         .then(deferMaker(1000, 3000))
