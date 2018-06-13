@@ -154,6 +154,7 @@ const waitElement = (selector, timeout) => {
     });
 };
 
+exports.initialize = initialize;
 exports.clickPos = clickPos;
 exports.clickInRect = clickInRect;
 exports.genCodeTypeText = genCodeTypeText;

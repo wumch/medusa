@@ -87,8 +87,7 @@ const agreeTerm = () => {
                 };
                 const toPos = globalPos(posInRect(rightRect));
                 mouseDrag(fromPos, toPos);
-            }).then(deferMaker(500))  // 拖完等一会
-            .then(() => {  // 检查是否验证通过
+            }).then(() => {  // 拖完等待验证通过
                 const captchaPast = () => {
                     return !/\bbtn-disabled\b/.test(document.querySelector('#J_BtnMobileForm').className);
                 };
@@ -102,7 +101,7 @@ const agreeTerm = () => {
 // 获取代理 todo: implement
 const fetchProxy = () => {
     return new Promise((resolve, reject) => {
-        resolve();
+        resolve('http://127.0.0.1:8088');
     });
 };
 
@@ -127,8 +126,9 @@ const clickElement = (selector) => {
 
 // 重启整个流程
 const restart = () => {
-    logger.info('reload. current page url: ', webview.getURL());
-    wc.reload();
+    logger.info('reloading <WebContents>. current page url:', wc.getURL());
+    window.reload();
+    logger.info('<WebContents> reloaded, current url: ', wc.getURL());
 };
 
 // 启动
