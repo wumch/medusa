@@ -99,17 +99,22 @@ const agreeTerm = () => {
     });
 };
 
+// 获取代理 todo: implement
 const fetchProxy = () => {
-    return new Promise();
+    return new Promise((resolve, reject) => {
+        resolve();
+    });
 };
 
 // 为<webview>设置http代理
 const attachProxy = proxy => {
     return new Promise((resolve, reject) => {
         fetchProxy().then(proxy => {
+            if (!proxy) return reject();
             wc.session.setProxy({proxyRules: proxy}, () => {
                 logger.info('using proxy', proxy);
-                webview.loadURL('https://www.baidu.com/s?wd=ip&rsv_spt=1&rsv_iqid=0x991d149e00045283&issp=1&f=8&rsv_bp=0&rsv_idx=2&ie=utf-8&tn=baiduhome_pg&rsv_enter=1&rsv_sug3=2&rsv_sug1=2&rsv_sug7=100&rsv_sug2=0&inputT=595&rsv_sug4=595');
+                // webview.loadURL('https://www.baidu.com/s?wd=ip&rsv_spt=1&rsv_iqid=0x991d149e00045283&issp=1&f=8&rsv_bp=0&rsv_idx=2&ie=utf-8&tn=baiduhome_pg&rsv_enter=1&rsv_sug3=2&rsv_sug1=2&rsv_sug7=100&rsv_sug2=0&inputT=595&rsv_sug4=595');
+                return resolve();
             });
         }, reject);
     })
