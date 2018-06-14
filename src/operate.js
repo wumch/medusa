@@ -21,14 +21,14 @@ const clickPos = pos => {
 };
 
 // 点击DOM元素
-const clickInRect = (rect) => {
+const clickInRect = rect => {
     const pos = globalPos(posInRect(rect));
     getLogger().debug('click in rect', pos);
     clickPos(pos);
 };
 
 // 转换为全局坐标
-const globalPos = (pos) => {
+const globalPos = pos => {
     return {
         x: pos.x + config.winPos.x + config.winFrame.width,
         y: pos.y + config.winPos.y + config.winFrame.height,
@@ -36,7 +36,7 @@ const globalPos = (pos) => {
 };
 
 // 区域随机取点
-const posInRect = (rect) => {
+const posInRect = rect => {
     return {
         x: rect.x + (Math.random() + 1) * rect.width / 3,  // 中间 1/3  位置
         y: rect.y + (Math.random() + 1) * rect.height / 3,
@@ -61,7 +61,7 @@ const genCodeTypeText = (selector, text) => {
 };
 
 // 生成js代码：取<webview>内部元素的位置
-const genCodeGetRect = (selector) => {
+const genCodeGetRect = selector => {
     const f = s => {
         const e = document.querySelector(s);
         if (!e) return null;
