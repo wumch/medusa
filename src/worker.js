@@ -120,7 +120,7 @@ const attachProxy = proxy => {
 };
 
 // 点击<webview>内部元素
-const clickElement = (selector) => {
+const clickElement = selector => {
     return shuttle(genCodeGetRect(selector)).then(clickInRect);
 };
 
