@@ -16,7 +16,7 @@ const initialize = _wc => {
 // 点击全局坐标
 const clickPos = pos => {
     robot.moveMouse(pos.x, pos.y);
-    getLogger().debug('click at', [pos.x + config.winPos.x + config.winFrame.width, pos.y + config.winPos.y + config.winFrame.height]);
+    getLogger().debug('click at', pos);
     robot.mouseClick();
 };
 
