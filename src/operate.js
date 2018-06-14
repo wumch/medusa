@@ -1,8 +1,8 @@
 
 const {remote} = require('electron');
 const robot = require('robotjs');
-const config = remote.getGlobal('config');
 const {getLogger} = require('./logger');
+const config = remote.getGlobal('config');
 
 /**
  * @type WebContents
